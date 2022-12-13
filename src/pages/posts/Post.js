@@ -1,10 +1,11 @@
 import React from 'react'
 import { Card, Media, OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import { Avatar } from '../../components/Avatar'
 import { useCurrentUser } from '../../components/context/CurrentUserContext'
 import styles from '../../styles/Post.module.css'
 import { axiosRes } from "../../api/axiosDefaults";
+import { MoreDropdown } from '../../components/MoreDropdown'
 
 const Post = (props) => {
     const {
@@ -25,6 +26,20 @@ const Post = (props) => {
 
     const currentUser = useCurrentUser();
     const is_owner = currentUser?.username === owner
+    const history = useHistory();
+
+    const handleEdit = () => {
+      history.push(`/posts/${id}/edit`)
+    }
+
+    const handleDelete = async () => {
+      try {
+        axiosRes.delete(`/posts/${id}/`)
+        history.goBack()
+      } catch (err) {
+        console.log(err)
+      }
+    }
 
     const handleLike = async () => {
       try{
@@ -69,7 +84,12 @@ const Post = (props) => {
           </Link>
           <div className="d-flex align-items-center">
             <span>{update_at}</span>
-            {is_owner && postPage && "..."}
+            {is_owner && postPage && (
+              <MoreDropdown
+                handleEdit={handleEdit}
+                handleDelete={handleDelete}
+              />
+            )}
           </div>
         </Media>
       </Card.Body>
@@ -105,7 +125,7 @@ const Post = (props) => {
           )}
           {likes_count}
           <Link to={`/posts/${id}`}>
-            <i className='far fa-comments'/>
+            <i className="far fa-comments" />
           </Link>
           {comments_count}
         </div>
